@@ -1,10 +1,3 @@
-/*
- * testeLCD.c
- *
- * Created: 09/08/2022 21:37:04
- * Author : viguc
- */ 
-
 #include <avr/io.h>
 
 
@@ -27,8 +20,7 @@
 //----------------------------------------------------------------------------------------------------------------------------
 
 
-#define PORTDisplay PORTB         // PORTB utilizado nos displays
-#define DDRDisplay  DDRB
+// PORTB utilizado nos displays
 #define D7			B,0      // PORTB.0
 #define D6			B,1      // PORTB.1
 #define D5			B,2      // PORTB.2
@@ -36,9 +28,7 @@
 #define E			B,4      // PORTB.4
 #define RS			B,5      // PORTB.5
 
-#define PORTTeclado PORTD         // PORTD utilizado no teclado
-#define DDRTeclado  DDRD
-#define PINTeclado  PIND
+// PORTD utilizado no teclado
 #define LINHA1		D,0      // PORTD.0
 #define LINHA2      D,1      // PORTD.1
 #define LINHA3      D,2      // PORTD.2
@@ -65,7 +55,7 @@ unsigned long int overflow_counter = 0;
 int main(void)
 {
 	
-	// Configuração inicial do Timer0
+	// ConfiguraÃ§Ã£o inicial do Timer0
 	TCCR0A = 0;
 	TCCR0B = 1;
 	
@@ -88,13 +78,13 @@ int main(void)
 	INPUT(COLUNA4);
 	
 	
-	// Garante que todas as linhas comecem em nível lógico alto
+	// Garante que todas as linhas comecem em nÃ­vel lÃ³gico alto
 	LOW(LINHA1);
 	LOW(LINHA2);
 	LOW(LINHA3);
 	LOW(LINHA4);
 	
-	// Inicialização do display
+	// InicializaÃ§Ã£o do display
 	functionSet();
 	entryModeSet(1, 0);
 	displayOnOffControl(1, 1, 1);
@@ -133,7 +123,7 @@ char get_tecla(){
 	return 0;
 }
 
-// Varre as linhas com o nível lógico baixo
+// Varre as linhas com o nÃ­vel lÃ³gico baixo
 void scan_linhas(){
 	static char linha_atual = 1;
 	
@@ -154,7 +144,7 @@ unsigned char debounce(char linha, char coluna){
 	// Entra no loop apenas se a linha estiver selecionada
 	if(!linha){
 		
-		// Enquanto contador for diferente de BOUNCE, itera até estabilzar
+		// Enquanto contador for diferente de BOUNCE, itera atÃ© estabilzar
 		while(counter != BOUNCE){
 			delay_50us();
 			delay_50us();
@@ -181,7 +171,7 @@ void delay_50us(void){
 	overflow_counter++;
 }
 
-// Conjunto de funções utilizadas para o Display LCD 16x2
+// Conjunto de funÃ§Ãµes utilizadas para o Display LCD 16x2
 void functionSet(void) {
 	LOW(D7);
 	LOW(D6);
