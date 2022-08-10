@@ -1,26 +1,52 @@
+/*
+ * testeLCD.c
+ *
+ * Created: 09/08/2022 21:37:04
+ * Author : viguc
+ */ 
+
 #include <avr/io.h>
+
+
+//----------------------------------------------------------------------------------------------------------------------------
+// MACROS FOR EASY PIN HANDLING FOR ATMEL GCC-AVR
+//these macros are used indirectly by other macros , mainly for string concatination
+#define _SET(type,name,bit)          type ## name  |= _BV(bit)
+#define _CLEAR(type,name,bit)        type ## name  &= ~ _BV(bit)
+#define _TOGGLE(type,name,bit)       type ## name  ^= _BV(bit)
+#define _GET(type,name,bit)          ((type ## name >> bit) &  1)
+#define _PUT(type,name,bit,value)    type ## name = ( type ## name & ( ~ _BV(bit)) ) | ( ( 1 & (unsigned char)value ) << bit )
+
+//these macros are used by end user
+#define OUTPUT(pin)         _SET(DDR,pin)
+#define INPUT(pin)          _CLEAR(DDR,pin)
+#define HIGH(pin)           _SET(PORT,pin)
+#define LOW(pin)            _CLEAR(PORT,pin)
+#define TOGGLE(pin)         _TOGGLE(PORT,pin)
+#define READ(pin)           _GET(PIN,pin)
+//----------------------------------------------------------------------------------------------------------------------------
 
 
 #define PORTDisplay PORTB         // PORTB utilizado nos displays
 #define DDRDisplay  DDRB
-#define DB7			(1 << 0)      // PORTB.0
-#define DB6			(1 << 1)      // PORTB.1
-#define DB5			(1 << 2)      // PORTB.2
-#define DB4			(1 << 3)      // PORTB.3
-#define E			(1 << 4)      // PORTB.4
-#define RS			(1 << 5)      // PORTB.5
+#define D7			B,0      // PORTB.0
+#define D6			B,1      // PORTB.1
+#define D5			B,2      // PORTB.2
+#define D4			B,3      // PORTB.3
+#define E			B,4      // PORTB.4
+#define RS			B,5      // PORTB.5
 
 #define PORTTeclado PORTD         // PORTD utilizado no teclado
 #define DDRTeclado  DDRD
 #define PINTeclado  PIND
-#define LINHA1		(1 << 0)      // PORTD.0
-#define LINHA2      (1 << 1)      // PORTD.1
-#define LINHA3      (1 << 2)      // PORTD.2
-#define LINHA4      (1 << 3)      // PORTD.3
-#define COLUNA1		(1 << 4)      // PORTD.4
-#define COLUNA2     (1 << 5)      // PORTD.5
-#define COLUNA3     (1 << 6)      // PORTD.6
-#define COLUNA4     (1 << 7)      // PORTD.7
+#define LINHA1		D,0      // PORTD.0
+#define LINHA2      D,1      // PORTD.1
+#define LINHA3      D,2      // PORTD.2
+#define LINHA4      D,3      // PORTD.3
+#define COLUNA1		D,4      // PORTD.4
+#define COLUNA2     D,5      // PORTD.5
+#define COLUNA3     D,6      // PORTD.6
+#define COLUNA4     D,7      // PORTD.7
 
 
 unsigned char debounce(char, char);
@@ -30,7 +56,7 @@ void displayOnOffControl(char, char, char);
 char getBit(char, char);
 void sendChar(char);
 void setDdRamAddress(char);
-void delay50us();
+void delay_50us();
 void scan_linhas();
 char get_tecla();
 
@@ -38,36 +64,43 @@ unsigned long int overflow_counter = 0;
 
 int main(void)
 {
-    
+	
 	// Configuração inicial do Timer0
 	TCCR0A = 0;
 	TCCR0B = 1;
 	
 	// Display como output
 	// Linhas como outputs e colunas como inputs
-	DDRDisplay |= DB7;	    DDRDisplay |= DB4;
-	DDRDisplay |= DB6;      DDRDisplay |= E;
-	DDRDisplay |= DB5;      DDRDisplay |= RS;
+	OUTPUT(D4);
+	OUTPUT(D5);
+	OUTPUT(D6);
+	OUTPUT(D7);
+	OUTPUT(E);
+	OUTPUT(RS);
 	
-	DDRTeclado |= LINHA1;	DDRTeclado &= ~COLUNA1;
-	DDRTeclado |= LINHA2;	DDRTeclado &= ~COLUNA2;
-	DDRTeclado |= LINHA3;	DDRTeclado &= ~COLUNA3;
-	DDRTeclado |= LINHA4;	DDRTeclado &= ~COLUNA4;
+	OUTPUT(LINHA1);
+	OUTPUT(LINHA2);
+	OUTPUT(LINHA3);
+	OUTPUT(LINHA4);
+	INPUT(COLUNA1);
+	INPUT(COLUNA2);
+	INPUT(COLUNA3);
+	INPUT(COLUNA4);
 	
 	
 	// Garante que todas as linhas comecem em nível lógico alto
-	PORTTeclado |= LINHA1;
-	PORTTeclado |= LINHA2;
-	PORTTeclado |= LINHA3;
-	PORTTeclado |= LINHA4;
-		
+	LOW(LINHA1);
+	LOW(LINHA2);
+	LOW(LINHA3);
+	LOW(LINHA4);
+	
 	// Inicialização do display
 	functionSet();
 	entryModeSet(1, 0);
 	displayOnOffControl(1, 1, 1);
 	
-    while (1) 
-    {
+	while (1)
+	{
 		char tecla_atual = get_tecla();
 		
 		if(tecla_atual != 0){
@@ -76,27 +109,27 @@ int main(void)
 		}
 
 		scan_linhas();
-    }
+	}
 }
 
 // Retorna o caractere lido
 char get_tecla(){
-	if(debounce((PINTeclado & LINHA1), !(PINTeclado & COLUNA1))){ return '1';}
-	else if(debounce((PINTeclado & LINHA1), !(PINTeclado & COLUNA2))){ return '2';}
-	else if(debounce((PINTeclado & LINHA1), !(PINTeclado & COLUNA3))){ return '3';}
-	else if(debounce((PINTeclado & LINHA1), !(PINTeclado & COLUNA4))){ return 'A';}
-	else if(debounce((PINTeclado & LINHA2), !(PINTeclado & COLUNA1))){ return '4';}
-	else if(debounce((PINTeclado & LINHA2), !(PINTeclado & COLUNA2))){ return '5';}
-	else if(debounce((PINTeclado & LINHA2), !(PINTeclado & COLUNA3))){ return '6';}
-	else if(debounce((PINTeclado & LINHA2), !(PINTeclado & COLUNA4))){ return 'B';}
-	else if(debounce((PINTeclado & LINHA3), !(PINTeclado & COLUNA1))){ return '7';}
-	else if(debounce((PINTeclado & LINHA3), !(PINTeclado & COLUNA2))){ return '8';}
-	else if(debounce((PINTeclado & LINHA3), !(PINTeclado & COLUNA3))){ return '9';}
-	else if(debounce((PINTeclado & LINHA3), !(PINTeclado & COLUNA4))){ return 'C';}
-	else if(debounce((PINTeclado & LINHA4), !(PINTeclado & COLUNA1))){ return '*';}
-	else if(debounce((PINTeclado & LINHA4), !(PINTeclado & COLUNA2))){ return '0';}
-	else if(debounce((PINTeclado & LINHA4), !(PINTeclado & COLUNA3))){ return '#';}
-	else if(debounce((PINTeclado & LINHA4), !(PINTeclado & COLUNA4))){ return 'D';}
+	if(debounce(READ(LINHA1), !READ(COLUNA1))){ return '1';}
+	else if(debounce(READ(LINHA1), !READ(COLUNA2))){ return '2';}
+	else if(debounce(READ(LINHA1), !READ(COLUNA3))){ return '3';}
+	else if(debounce(READ(LINHA1), !READ(COLUNA4))){ return 'A';}
+	else if(debounce(READ(LINHA2), !READ(COLUNA1))){ return '4';}
+	else if(debounce(READ(LINHA2), !READ(COLUNA2))){ return '5';}
+	else if(debounce(READ(LINHA2), !READ(COLUNA3))){ return '6';}
+	else if(debounce(READ(LINHA2), !READ(COLUNA4))){ return 'B';}
+	else if(debounce(READ(LINHA3), !READ(COLUNA1))){ return '7';}
+	else if(debounce(READ(LINHA3), !READ(COLUNA2))){ return '8';}
+	else if(debounce(READ(LINHA3), !READ(COLUNA3))){ return '9';}
+	else if(debounce(READ(LINHA3), !READ(COLUNA4))){ return 'C';}
+	else if(debounce(READ(LINHA4), !READ(COLUNA1))){ return '*';}
+	else if(debounce(READ(LINHA4), !READ(COLUNA2))){ return '0';}
+	else if(debounce(READ(LINHA4), !READ(COLUNA3))){ return '#';}
+	else if(debounce(READ(LINHA4), !READ(COLUNA4))){ return 'D';}
 	return 0;
 }
 
@@ -104,13 +137,13 @@ char get_tecla(){
 void scan_linhas(){
 	static char linha_atual = 1;
 	
-	if(linha_atual == 1){PORTTeclado &= ~LINHA1; PORTTeclado |= LINHA4;} 
-	else if(linha_atual == 2){PORTTeclado &= ~LINHA2; PORTTeclado |= LINHA1;}
-	else if(linha_atual == 3){PORTTeclado &= ~LINHA3; PORTTeclado |= LINHA2;}
-	else if(linha_atual == 4){PORTTeclado &= ~LINHA4; PORTTeclado |= LINHA3;}
+	if(linha_atual == 1){LOW(LINHA1); HIGH(LINHA4);}
+	else if(linha_atual == 2){LOW(LINHA2); HIGH(LINHA1);}
+	else if(linha_atual == 3){LOW(LINHA3); HIGH(LINHA2);}
+	else if(linha_atual == 4){LOW(LINHA4); HIGH(LINHA3);}
 	
 	linha_atual++;
-	if(linha_atual == 5){linha_atual = 1;}	
+	if(linha_atual == 5){linha_atual = 1;}
 }
 
 // Realiza o debounce das teclas
@@ -150,83 +183,83 @@ void delay_50us(void){
 
 // Conjunto de funções utilizadas para o Display LCD 16x2
 void functionSet(void) {
-	PORTDisplay &= ~DB7;
-	PORTDisplay &= ~DB6;
-	PORTDisplay |= DB5;
-	PORTDisplay &= ~DB4;
-	PORTDisplay &= ~RS;
-	PORTDisplay |= E;
-	PORTDisplay &= ~E;
+	LOW(D7);
+	LOW(D6);
+	HIGH(D5);
+	LOW(D4);
+	LOW(RS);
+	HIGH(E);
+	LOW(E);
 	delay_50us();
-	PORTDisplay |= E;
-	PORTDisplay &= ~E;
-	PORTDisplay |= DB7;
-	PORTDisplay |= E;
-	PORTDisplay &= ~E;
+	HIGH(E);
+	LOW(E);
+	HIGH(D7);
+	HIGH(E);
+	LOW(E);
 	delay_50us();
 }
 void entryModeSet(char id, char s) {
-	PORTDisplay &= ~RS;
-	PORTDisplay &= ~DB7;
-	PORTDisplay &= ~DB6;
-	PORTDisplay &= ~DB5;
-	PORTDisplay &= ~DB4;
-	PORTDisplay |= E;
-	PORTDisplay &= ~E;
-	PORTDisplay |= DB6;
-	if(id == 1){PORTDisplay |= DB5;} else{PORTDisplay &= ~DB5;}
-	if(s == 1){PORTDisplay |= DB4;} else{PORTDisplay &= ~DB4;}
-	PORTDisplay |= E;
-	PORTDisplay &= ~E;
+	LOW(RS);
+	LOW(D7);
+	LOW(D6);
+	LOW(D5);
+	LOW(D4);
+	HIGH(E);
+	LOW(E);
+	HIGH(D6);
+	if(id == 1){HIGH(D5);} else{LOW(D5);}
+	if(s == 1){HIGH(D4);} else{LOW(D4);}
+	HIGH(E);
+	LOW(E);
 	delay_50us();
 }
 void displayOnOffControl(char display, char cursor, char blinking) {
-	PORTDisplay &= ~DB7;
-	PORTDisplay &= ~DB6;
-	PORTDisplay &= ~DB5;
-	PORTDisplay &= ~DB4;
-	PORTDisplay |= E;
-	PORTDisplay &= ~E;
-	PORTDisplay |= DB7;
-	if(display == 1){PORTDisplay |= DB6;} else{PORTDisplay &= ~DB6;}
-	if(cursor == 1){PORTDisplay |= DB5;} else{PORTDisplay &= ~DB5;}
-	if(blinking == 1){PORTDisplay |= DB4;} else{PORTDisplay &= ~DB4;}
-	PORTDisplay |= E;
-	PORTDisplay &= ~E;
+	LOW(D7);
+	LOW(D6);
+	LOW(D5);
+	LOW(D4);
+	HIGH(E);
+	LOW(E);
+	HIGH(D7);
+	if(display == 1){HIGH(D6);} else{LOW(D6);}
+	if(cursor == 1){HIGH(D5);} else{LOW(D5);}
+	if(blinking == 1){HIGH(D4);} else{LOW(D4);}
+	HIGH(E);
+	LOW(E);
 	delay_50us();
 }
 char getBit(char c, char bitNumber) {
 	return (c >> bitNumber) & 1;
 }
 void sendChar(char c) {
-	if(getBit(c, 7) == 1){PORTDisplay |= DB7;} else{PORTDisplay &= ~DB7;}
-	if(getBit(c, 6) == 1){PORTDisplay |= DB6;} else{PORTDisplay &= ~DB6;}
-	if(getBit(c, 5) == 1){PORTDisplay |= DB5;} else{PORTDisplay &= ~DB5;}
-	if(getBit(c, 4) == 1){PORTDisplay |= DB4;} else{PORTDisplay &= ~DB4;}
-	PORTDisplay |= RS;
-	PORTDisplay |= E;
-	PORTDisplay &= ~E;
-	if(getBit(c, 3) == 1){PORTDisplay |= DB7;} else{PORTDisplay &= ~DB7;}
-	if(getBit(c, 2) == 1){PORTDisplay |= DB6;} else{PORTDisplay &= ~DB6;}
-	if(getBit(c, 1) == 1){PORTDisplay |= DB5;} else{PORTDisplay &= ~DB5;}
-	if(getBit(c, 0) == 1){PORTDisplay |= DB4;} else{PORTDisplay &= ~DB4;}
-	PORTDisplay |= E;
-	PORTDisplay &= ~E;
+	if(getBit(c, 7) == 1){HIGH(D7);} else{LOW(D7);}
+	if(getBit(c, 6) == 1){HIGH(D6);} else{LOW(D6);}
+	if(getBit(c, 5) == 1){HIGH(D5);} else{LOW(D5);}
+	if(getBit(c, 4) == 1){HIGH(D4);} else{LOW(D4);}
+	HIGH(RS);
+	HIGH(E);
+	LOW(E);
+	if(getBit(c, 3) == 1){HIGH(D7);} else{LOW(D7);}
+	if(getBit(c, 2) == 1){HIGH(D6);} else{LOW(D6);}
+	if(getBit(c, 1) == 1){HIGH(D5);} else{LOW(D5);}
+	if(getBit(c, 0) == 1){HIGH(D4);} else{LOW(D4);}
+	HIGH(E);
+	LOW(E);
 	delay_50us();
 }
 void setDdRamAddress(char address) {
-	PORTDisplay &= ~RS;
-	PORTDisplay |= DB7;
-	if(getBit(address, 6) == 1){PORTDisplay |= DB6;} else{PORTDisplay &= ~DB6;}
-	if(getBit(address, 5) == 1){PORTDisplay |= DB5;} else{PORTDisplay &= ~DB5;}
-	if(getBit(address, 4) == 1){PORTDisplay |= DB4;} else{PORTDisplay &= ~DB4;}
-	PORTDisplay |= E;
-	PORTDisplay &= ~E;
-	if(getBit(address, 3) == 1){PORTDisplay |= DB7;} else{PORTDisplay &= ~DB7;}
-	if(getBit(address, 2) == 1){PORTDisplay |= DB6;} else{PORTDisplay &= ~DB6;}
-	if(getBit(address, 1) == 1){PORTDisplay |= DB5;} else{PORTDisplay &= ~DB5;}
-	if(getBit(address, 0) == 1){PORTDisplay |= DB4;} else{PORTDisplay &= ~DB4;}
-	PORTDisplay |= E;
-	PORTDisplay &= ~E;
+	LOW(RS);
+	HIGH(D7);
+	if(getBit(address, 6) == 1){HIGH(D6);} else{LOW(D6);}
+	if(getBit(address, 5) == 1){HIGH(D5);} else{LOW(D5);}
+	if(getBit(address, 4) == 1){HIGH(D4);} else{LOW(D4);}
+	HIGH(E);
+	LOW(E);
+	if(getBit(address, 3) == 1){HIGH(D7);} else{LOW(D7);}
+	if(getBit(address, 2) == 1){HIGH(D6);} else{LOW(D6);}
+	if(getBit(address, 1) == 1){HIGH(D5);} else{LOW(D5);}
+	if(getBit(address, 0) == 1){HIGH(D4);} else{LOW(D4);}
+	HIGH(E);
+	LOW(E);
 	delay_50us();
 }
