@@ -1,6 +1,5 @@
 #include <avr/io.h>
 
-
 //----------------------------------------------------------------------------------------------------------------------------
 // MACROS FOR EASY PIN HANDLING FOR ATMEL GCC-AVR
 //these macros are used indirectly by other macros , mainly for string concatination
@@ -21,22 +20,22 @@
 
 
 // pinos utilizados no Display
-#define RS          F,2      // D56
-#define E           F,3      // D57
-#define D4          F,4      // D58
-#define D5          F,5      // D59
-#define D6          F,6      // D60
-#define D7          F,7      // D61
+#define RS          B,7      // D13
+#define E           B,6      // D12
+#define D4          B,5      // D11
+#define D5          B,4      // D10
+#define D6          H,6      // D9
+#define D7          H,5      // D8
 
 // pinos utilizados no Teclado
-#define LINHA1      K,0      // D62
-#define LINHA2      K,1      // D63
-#define LINHA3      K,2      // D64
-#define LINHA4      K,3      // D65
-#define COLUNA1     K,4      // D66
-#define COLUNA2     K,5      // D67
-#define COLUNA3     K,6      // D68
-#define COLUNA4     K,7      // D69
+#define LINHA1      J,1      // D14
+#define LINHA2      J,0      // D15
+#define LINHA3      H,1      // D16
+#define LINHA4      H,0      // D17
+#define COLUNA1     D,3      // D18
+#define COLUNA2     D,2      // D19
+#define COLUNA3     D,1      // D20
+#define COLUNA4     D,0      // D21
 
 
 unsigned char debounce(char, char);
@@ -79,10 +78,10 @@ int main(void)
 	
 	
 	// Garante que todas as linhas comecem em nível lógico alto
-	LOW(LINHA1);
-	LOW(LINHA2);
-	LOW(LINHA3);
-	LOW(LINHA4);
+	HIGH(LINHA1);
+	HIGH(LINHA2);
+	HIGH(LINHA3);
+	HIGH(LINHA4);
 	
 	// Inicialização do display
 	functionSet();
@@ -97,43 +96,28 @@ int main(void)
 			setDdRamAddress(0x00);
 			sendChar(tecla_atual);
 		}
-
-		scan_linhas();
 	}
 }
 
 // Retorna o caractere lido
 char get_tecla(){
-	if(debounce(READ(LINHA1), !READ(COLUNA1))){ return '1';}
-	else if(debounce(READ(LINHA1), !READ(COLUNA2))){ return '2';}
-	else if(debounce(READ(LINHA1), !READ(COLUNA3))){ return '3';}
-	else if(debounce(READ(LINHA1), !READ(COLUNA4))){ return 'A';}
-	else if(debounce(READ(LINHA2), !READ(COLUNA1))){ return '4';}
-	else if(debounce(READ(LINHA2), !READ(COLUNA2))){ return '5';}
-	else if(debounce(READ(LINHA2), !READ(COLUNA3))){ return '6';}
-	else if(debounce(READ(LINHA2), !READ(COLUNA4))){ return 'B';}
-	else if(debounce(READ(LINHA3), !READ(COLUNA1))){ return '7';}
-	else if(debounce(READ(LINHA3), !READ(COLUNA2))){ return '8';}
-	else if(debounce(READ(LINHA3), !READ(COLUNA3))){ return '9';}
-	else if(debounce(READ(LINHA3), !READ(COLUNA4))){ return 'C';}
-	else if(debounce(READ(LINHA4), !READ(COLUNA1))){ return '*';}
-	else if(debounce(READ(LINHA4), !READ(COLUNA2))){ return '0';}
-	else if(debounce(READ(LINHA4), !READ(COLUNA3))){ return '#';}
-	else if(debounce(READ(LINHA4), !READ(COLUNA4))){ return 'D';}
+	if(!debounce(1, 1)){ return '1';}
+	else if(!debounce(1, 2)){ return '2';}
+	else if(!debounce(1, 3)){ return '3';}
+	else if(!debounce(1, 4)){ return 'A';}
+	else if(!debounce(2, 1)){ return '4';}
+	else if(!debounce(2, 2)){ return '5';}
+	else if(!debounce(2, 3)){ return '6';}
+	else if(!debounce(2, 4)){ return 'B';}
+	else if(!debounce(3, 1)){ return '7';}
+	else if(!debounce(3, 2)){ return '8';}
+	else if(!debounce(3, 3)){ return '9';}
+	else if(!debounce(3, 4)){ return 'C';}
+	else if(!debounce(4, 1)){ return '*';}
+	else if(!debounce(4, 2)){ return '0';}
+	else if(!debounce(4, 3)){ return '#';}
+	else if(!debounce(4, 4)){ return 'D';}
 	return 0;
-}
-
-// Varre as linhas com o nível lógico baixo
-void scan_linhas(){
-	static char linha_atual = 1;
-	
-	if(linha_atual == 1){LOW(LINHA1); HIGH(LINHA4);}
-	else if(linha_atual == 2){LOW(LINHA2); HIGH(LINHA1);}
-	else if(linha_atual == 3){LOW(LINHA3); HIGH(LINHA2);}
-	else if(linha_atual == 4){LOW(LINHA4); HIGH(LINHA3);}
-	
-	linha_atual++;
-	if(linha_atual == 5){linha_atual = 1;}
 }
 
 // Realiza o debounce das teclas
@@ -141,23 +125,46 @@ unsigned char debounce(char linha, char coluna){
 	unsigned char current_key = 0, last_key = 0, counter = 0;
 	char const BOUNCE = 7;
 	
-	// Entra no loop apenas se a linha estiver selecionada
-	if(!linha){
-		
-		// Enquanto contador for diferente de BOUNCE, itera até estabilzar
-		while(counter != BOUNCE){
-			delay_50us();
-			delay_50us();
-			current_key = coluna;
-			
-			if(last_key == current_key){
-				counter++;
-				} else{
-				counter = 0;
-			}
-			
-			last_key = current_key;
+	// ativa a leitura da linha indicada
+	switch (linha){
+	case 1:
+		LOW(LINHA1); HIGH(LINHA2); HIGH(LINHA3); HIGH(LINHA4);
+		break;
+	case 2:
+		HIGH(LINHA1); LOW(LINHA2); HIGH(LINHA3); HIGH(LINHA4);
+		break;
+	case 3:
+		HIGH(LINHA1); HIGH(LINHA2); LOW(LINHA3); HIGH(LINHA4);
+		break;
+	case 4:
+		HIGH(LINHA1); HIGH(LINHA2); HIGH(LINHA3); LOW(LINHA4);
+	}
+	
+	// Enquanto contador for diferente de BOUNCE, itera até estabilzar
+	while(counter < BOUNCE){
+		delay_50us();
+		delay_50us();
+		switch(coluna){
+			case 1:
+				current_key = READ(COLUNA1);
+				break;
+			case 2:
+				current_key = READ(COLUNA2);
+				break;
+			case 3:
+				current_key = READ(COLUNA3);
+				break;
+			case 4:
+				current_key = READ(COLUNA4);
 		}
+		
+		if(last_key == current_key){
+			counter++;
+		}else{
+			counter = 0;
+		}
+		
+		last_key = current_key;
 	}
 	
 	return current_key;
