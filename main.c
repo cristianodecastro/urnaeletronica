@@ -28,14 +28,18 @@
 #define D7          H,5      // D8
 
 // pinos utilizados no Teclado
-#define LINHA1      J,1      // D14
-#define LINHA2      J,0      // D15
-#define LINHA3      H,1      // D16
-#define LINHA4      H,0      // D17
-#define COLUNA1     D,3      // D18
-#define COLUNA2     D,2      // D19
-#define COLUNA3     D,1      // D20
-#define COLUNA4     D,0      // D21
+#define LINHA1      F,0      // A0
+#define LINHA2      F,1      // A1
+#define LINHA3      F,2      // A2
+#define LINHA4      F,3      // A3
+#define COLUNA1     F,4      // A4
+#define COLUNA2     F,5      // A5
+#define COLUNA3     F,6      // A6
+#define COLUNA4     F,7      // A7
+
+// pinos utilizados no Buzzer e no LED
+#define BUZZER      H,4      // D7
+#define LED         H,3      // D6
 
 
 unsigned char debounce(char, char);
@@ -88,9 +92,11 @@ int main(void)
 	entryModeSet(1, 0);
 	displayOnOffControl(1, 1, 1);
 	
+	char tecla_atual = 0;
+	
 	while (1)
 	{
-		char tecla_atual = get_tecla();
+		tecla_atual = get_tecla();
 		
 		if(tecla_atual != 0){
 			setDdRamAddress(0x00);
@@ -102,21 +108,21 @@ int main(void)
 // Retorna o caractere lido
 char get_tecla(){
 	if(!debounce(1, 1)){ return '1';}
-	else if(!debounce(1, 2)){ return '2';}
-	else if(!debounce(1, 3)){ return '3';}
-	else if(!debounce(1, 4)){ return 'A';}
-	else if(!debounce(2, 1)){ return '4';}
-	else if(!debounce(2, 2)){ return '5';}
-	else if(!debounce(2, 3)){ return '6';}
-	else if(!debounce(2, 4)){ return 'B';}
-	else if(!debounce(3, 1)){ return '7';}
-	else if(!debounce(3, 2)){ return '8';}
-	else if(!debounce(3, 3)){ return '9';}
-	else if(!debounce(3, 4)){ return 'C';}
-	else if(!debounce(4, 1)){ return '*';}
-	else if(!debounce(4, 2)){ return '0';}
-	else if(!debounce(4, 3)){ return '#';}
-	else if(!debounce(4, 4)){ return 'D';}
+	if(!debounce(1, 2)){ return '2';}
+	if(!debounce(1, 3)){ return '3';}
+	if(!debounce(1, 4)){ return 'A';}
+	if(!debounce(2, 1)){ return '4';}
+	if(!debounce(2, 2)){ return '5';}
+	if(!debounce(2, 3)){ return '6';}
+	if(!debounce(2, 4)){ return 'B';}
+	if(!debounce(3, 1)){ return '7';}
+	if(!debounce(3, 2)){ return '8';}
+	if(!debounce(3, 3)){ return '9';}
+	if(!debounce(3, 4)){ return 'C';}
+	if(!debounce(4, 1)){ return '*';}
+	if(!debounce(4, 2)){ return '0';}
+	if(!debounce(4, 3)){ return '#';}
+	if(!debounce(4, 4)){ return 'D';}
 	return 0;
 }
 
@@ -141,9 +147,18 @@ unsigned char debounce(char linha, char coluna){
 	}
 	
 	// Enquanto contador for diferente de BOUNCE, itera até estabilzar
-	while(counter < BOUNCE){
+	do{
 		delay_50us();
 		delay_50us();
+		delay_50us();
+		delay_50us();
+		delay_50us();
+		delay_50us();
+		delay_50us();
+		delay_50us();
+		delay_50us();
+		delay_50us();
+		
 		switch(coluna){
 			case 1:
 				current_key = READ(COLUNA1);
@@ -165,7 +180,7 @@ unsigned char debounce(char linha, char coluna){
 		}
 		
 		last_key = current_key;
-	}
+	}while(counter < BOUNCE);
 	
 	return current_key;
 }
