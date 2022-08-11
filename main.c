@@ -20,23 +20,23 @@
 //----------------------------------------------------------------------------------------------------------------------------
 
 
-// PORTB utilizado nos displays
-#define D7			B,0      // PORTB.0
-#define D6			B,1      // PORTB.1
-#define D5			B,2      // PORTB.2
-#define D4			B,3      // PORTB.3
-#define E			B,4      // PORTB.4
-#define RS			B,5      // PORTB.5
+// pinos utilizados no Display
+#define RS          F,2      // D56
+#define E           F,3      // D57
+#define D4          F,4      // D58
+#define D5          F,5      // D59
+#define D6          F,6      // D60
+#define D7          F,7      // D61
 
-// PORTD utilizado no teclado
-#define LINHA1		D,0      // PORTD.0
-#define LINHA2      D,1      // PORTD.1
-#define LINHA3      D,2      // PORTD.2
-#define LINHA4      D,3      // PORTD.3
-#define COLUNA1		D,4      // PORTD.4
-#define COLUNA2     D,5      // PORTD.5
-#define COLUNA3     D,6      // PORTD.6
-#define COLUNA4     D,7      // PORTD.7
+// pinos utilizados no Teclado
+#define LINHA1      K,0      // D62
+#define LINHA2      K,1      // D63
+#define LINHA3      K,2      // D64
+#define LINHA4      K,3      // D65
+#define COLUNA1     K,4      // D66
+#define COLUNA2     K,5      // D67
+#define COLUNA3     K,6      // D68
+#define COLUNA4     K,7      // D69
 
 
 unsigned char debounce(char, char);
