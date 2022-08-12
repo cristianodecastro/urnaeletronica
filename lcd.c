@@ -86,3 +86,11 @@ void setDdRamAddress(char address) {
 	LOW(E);
 	delay_microsegundos(40);
 }
+
+void sendString(char* str) {
+	int index = 0;
+	while (str[index] != 0) {
+		sendChar(str[index]);
+		index++;
+	}
+}
