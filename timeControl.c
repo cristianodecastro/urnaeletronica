@@ -1,12 +1,38 @@
 #define HOURS    0
 #define MINUTES  1
 #define SECONDS  2
+#define CLK 16000000
 
 #include "timeControl.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
 unsigned char currentTime[3]={0, 0, 0}; // guarda o horário atual em horas, minutos e segundos
+
+// <tempo> em microssegundos
+// Tmax = 16300
+void delay_microsegundos(int microssegundos){
+	TCCR0A = 0;
+	
+	if(microssegundos <= 127){
+		TCCR0B = 2; // Clk/8
+		TCNT0 = 256 - (CLK * microssegundos)/(8*1000000);
+	}
+	else if (microssegundos > 127 && microssegundos <= 1000){
+		TCCR0B = 3; // Clk/64
+		TCNT0 = 256 - (CLK * microssegundos)/(64*1000000);
+	}
+	else if(microssegundos > 1000 && microssegundos <= 4000){
+		TCCR0B = 4; // Clk/256
+		TCNT0 = 256 - (CLK * microssegundos)/(256*1000000);
+	}
+	else if(microssegundos > 4000 && microssegundos <= 16300){
+		TCCR0B = 5; // Clk/1024
+		TCNT0 = 256 - (CLK * microssegundos)/(1024*1000000);
+	}
+	
+	while((TIFR0 & (1 << 0)) == 0);
+}
 
 void timeControlConfig(){
 	TCCR1A = 0b00000000; // modo de contagem contínua até o valor do comparador A

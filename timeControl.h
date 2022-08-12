@@ -4,6 +4,8 @@
 
 unsigned char currentTime[3];
 
+void delay_microsegundos(int);
+
 void timeControlConfig();
 
 unsigned char setHorario(unsigned char horas, unsigned char minutos);
