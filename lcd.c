@@ -87,7 +87,7 @@ void setDdRamAddress(char address) {
 	delay_microsegundos(40);
 }
 
-void sendString(char* str, char linha, char coluna) {
+void sendString_setAdress(char* str, char linha, char coluna) {
 	int index = 0;
 	char endereco = 0;
 	
