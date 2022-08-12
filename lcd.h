@@ -8,5 +8,6 @@ char getBit(char, char);
 void sendChar(char);
 void setDdRamAddress(char);
 void sendString(char*);
+void sendString(char*, char, char);
 
 #endif // LCD_H_

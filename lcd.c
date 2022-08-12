@@ -87,9 +87,38 @@ void setDdRamAddress(char address) {
 	delay_microsegundos(40);
 }
 
+void sendString(char* str, char linha, char coluna) {
+	int index = 0;
+	char endereco = 0;
+	
+	if(linha == 2){
+		endereco += 64;
+	}
+	
+	endereco += coluna - 1;
+	
+	while (str[index] != 0) {
+		if((endereco >= 0 && endereco <= 0x0F) || (endereco >= 0x40 && endereco <= 0x4F)){
+			setDdRamAddress(endereco);
+			sendChar(str[index]);
+		}
+		index++;
+	}
+}
+
 void sendString(char* str) {
 	int index = 0;
+	char endereco = 0;
+	
+	if(linha == 2){
+		endereco += 64;
+	}
+	
+	endereco += coluna - 1;
+	
 	while (str[index] != 0) {
+		setDdRamAddress(endereco);
+		
 		sendChar(str[index]);
 		index++;
 	}
