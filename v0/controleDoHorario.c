@@ -42,9 +42,9 @@ ISR(TIMER1_OVF_vect)
 }
 
 int main(void){
-	TCCR1A = 0b00000000; // modo de contagem contínua até o valor do comparador A
+	TCCR1A = 0b00000000; // modo de contagem contÃ­nua atÃ© o valor do comparador A
 	TCCR1B = 0b00001100; // prescaler = 256 => frequencia do timer = 16MHz / 256 = 62.5Hz => T = 16us
-	OCR1A = 62500-1; // teto de contagem; vai contar de 0 até [(pulsos em um segundo) - 1] = contagem de um segundo
+	OCR1A = 62500-1; // teto de contagem; vai contar de 0 atÃ© [(pulsos em um segundo) - 1] = contagem de um segundo
 	TCNT1 = 0;
 
 	TIMSK1 |= ( 1 << 1 ); // habilita interrupcao por comparador A do timer1
