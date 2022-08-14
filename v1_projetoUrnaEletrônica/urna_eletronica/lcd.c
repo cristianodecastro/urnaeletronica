@@ -3,7 +3,7 @@
 #include "lcd.h"
 #include "timeControl.h"
 
-// Conjunto de funções utilizadas para o Display LCD 16x2
+// Conjunto de funÃ§Ãµes utilizadas para o Display LCD 16x2
 
 void functionSet(void) {
 	LOW(D7);
