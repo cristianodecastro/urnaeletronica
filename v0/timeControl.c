@@ -7,7 +7,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-unsigned char currentTime[3]={0, 0, 0}; // guarda o hor·rio atual em horas, minutos e segundos
+unsigned char currentTime[3]={0, 0, 0}; // guarda o hor√°rio atual em horas, minutos e segundos
 
 // <tempo> em microssegundos
 // Tmax = 16300
@@ -35,16 +35,16 @@ void delay_microsegundos(int microssegundos){
 }
 
 void timeControlConfig(){
-	TCCR1A = 0b00000000; // modo de contagem contÌnua atÈ o valor do comparador A
+	TCCR1A = 0b00000000; // modo de contagem cont√≠nua at√© o valor do comparador A
 	TCCR1B = 0b00001100; // prescaler = 256 => frequencia do timer = 16MHz / 256 = 62.5Hz => T = 16us
-	OCR1A = 62500-1; // teto de contagem; vai contar de 0 atÈ [(pulsos em um segundo) - 1] = contagem de um segundo
+	OCR1A = 62500-1; // teto de contagem; vai contar de 0 at√© [(pulsos em um segundo) - 1] = contagem de um segundo
 	TCNT1 = 0;
 
 	TIMSK1 |= ( 1 << 1 ); // habilita interrupcao por comparador A do timer1
 	sei();
 }
 
-// redefine o hor·rio se os valores passados nos argumentos forem coerentes
+// redefine o hor√°rio se os valores passados nos argumentos forem coerentes
 unsigned char setTime(unsigned char hours, unsigned char minutes){
 	if((hours < 24) && (minutes < 60)){
 		currentTime[HOURS] = hours;
@@ -55,7 +55,7 @@ unsigned char setTime(unsigned char hours, unsigned char minutes){
 	}
 }
 
-// incrementa hor·rio em um segundo
+// incrementa hor√°rio em um segundo
 void incTime(){
 	if(currentTime[SECONDS] == 59){
 		currentTime[SECONDS] = 0;
