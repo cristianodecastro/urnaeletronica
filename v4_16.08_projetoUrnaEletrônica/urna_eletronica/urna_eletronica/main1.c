@@ -44,7 +44,7 @@ int main(void){
 	OUTPUT(LED);
 	
 	
-	// Garante que todas as linhas comecem em nível lógico alto
+	// Garante que todas as linhas comecem em nÃ­vel lÃ³gico alto
 	HIGH(LINHA1);
 	HIGH(LINHA2);
 	HIGH(LINHA3);
@@ -58,7 +58,7 @@ int main(void){
 	LOW(BUZZER);
 	LOW(LED);
 	
-	// Inicialização do display
+	// InicializaÃ§Ã£o do display
 	functionSet();
 	entryModeSet(1, 0);
 	displayOnOffControl(1, 0, 0);
@@ -88,7 +88,7 @@ int main(void){
 					// TODO
 					break;
 				case OPTION_CONSULTA_HORA:
-					sendString_setAdress("HORA ATUAL:     ", 1, 1);
+					sendString_setAdress("HORA ATUAL:   ", 1, 1);
 					sendString_setAdress("              ", 2, 1);  sendChar(LEFT_ARROW_CHARACTER); sendChar('B');
 					exibe_hora_display();
 					if(get_tecla() == 'B'){
@@ -108,48 +108,48 @@ int main(void){
 					break;
 			}
 			
-			switch(menu_operacional_index){
+			switch(menu_operacional_index){RIGHT_OPTION_CHARACTER
 				case 1:
-					sendString_setAdress("1. Estado do  ", 1, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('A');
-					sendString_setAdress("    Sistema   ", 2, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('B');
+					sendString_setAdress("1. Estado do  ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
+					sendString_setAdress("    Sistema   ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = get_menu_tecla();
-					if(tecla == 'A'){ menu_operacional_index++;}
-					else if(tecla == 'B'){ option_menu_operacional = OPTION_ESTADO; menu_operacional_index = 0;}
+					if(tecla == 'B'){ menu_operacional_index++;}
+					else if(tecla == 'A'){ option_menu_operacional = OPTION_ESTADO; menu_operacional_index = 0;}
 					break;
 				case 2:
-					sendString_setAdress("2.    Novo    ", 1, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('A');
-					sendString_setAdress("     Eleitor  ", 2, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('B');
+					sendString_setAdress("2.    Novo    ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
+					sendString_setAdress("     Eleitor  ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = get_menu_tecla();
-					if(tecla == 'A'){ menu_operacional_index++;}
-					else if(tecla == 'B'){ option_menu_operacional = OPTION_ELEITOR; menu_operacional_index = 0;}
+					if(tecla == 'B'){ menu_operacional_index++;}
+					else if(tecla == 'A'){ option_menu_operacional = OPTION_ELEITOR; menu_operacional_index = 0;}
 					break;
 				case 3:
-					sendString_setAdress("3.  Consulta  ", 1, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('A');
-					sendString_setAdress("   de Horario ", 2, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('B');
+					sendString_setAdress("3.  Consulta  ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
+					sendString_setAdress("   de Horario ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = get_menu_tecla();
-					if(tecla == 'A'){ menu_operacional_index++;}
-					else if(tecla == 'B'){ option_menu_operacional = OPTION_CONSULTA_HORA; menu_operacional_index = 0;}
+					if(tecla == 'B'){ menu_operacional_index++;}
+					else if(tecla == 'A'){ option_menu_operacional = OPTION_CONSULTA_HORA; menu_operacional_index = 0;}
 					break;
 				case 4:
-					sendString_setAdress("4.  Troca de  ", 1, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('A');
-					sendString_setAdress("    Horario   ", 2, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('B');
+					sendString_setAdress("4.  Troca de  ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
+					sendString_setAdress("    Horario   ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = get_menu_tecla();
 					if(tecla == 'A'){ menu_operacional_index++;}
-					else if(tecla == 'B'){ option_menu_operacional = OPTION_TROCA_HORA; menu_operacional_index = 0;}
+					else if(tecla == 'A'){ option_menu_operacional = OPTION_TROCA_HORA; menu_operacional_index = 0;}
 					break;
 				case 5:
-					sendString_setAdress("5.  Verific.  ", 1, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('A');
-					sendString_setAdress("de Correspond.", 2, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('B');
+					sendString_setAdress("5.  Verific.  ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
+					sendString_setAdress("de Correspond.", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = get_menu_tecla();
-					if(tecla == 'A'){ menu_operacional_index++;}
-					else if(tecla == 'B'){ option_menu_operacional = OPTION_VERIFICA_CORRESPONDENCIA; menu_operacional_index = 0;}
+					if(tecla == 'B'){ menu_operacional_index++;}
+					else if(tecla == 'A'){ option_menu_operacional = OPTION_VERIFICA_CORRESPONDENCIA; menu_operacional_index = 0;}
 					break;
 				case 6:
-					sendString_setAdress("6. Relatorio  ", 1, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('A');
-					sendString_setAdress("  de Votacao  ", 2, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('B');
+					sendString_setAdress("6. Relatorio  ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
+					sendString_setAdress("  de Votacao  ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = get_menu_tecla();
 					if(tecla == 'A'){ menu_operacional_index = 1;}
-					else if(tecla == 'B'){ option_menu_operacional = OPTION_RELATORIO_VOTACAO; menu_operacional_index = 0;}
+					else if(tecla == 'A'){ option_menu_operacional = OPTION_RELATORIO_VOTACAO; menu_operacional_index = 0;}
 					break;
 				default:
 					break;
@@ -166,8 +166,8 @@ int main(void){
 	}
 }
 
-// Retorna opção 'A' (avançar próximo item)
-// ou 'B' (confirmar opção) do menu
+// Retorna opÃ§Ã£o 'A' (avanÃ§ar prÃ³ximo item)
+// ou 'B' (confirmar opÃ§Ã£o) do menu
 char get_menu_tecla(){
 	char tecla = 0;
 	while(tecla != 'A' && tecla != 'B'){
