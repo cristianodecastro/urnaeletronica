@@ -62,7 +62,6 @@ CANDIDATO candidato[13] = {
 	{{'4', '4', '5', '6', 0}, "Fortunati", "Dep Federal", {0, 0}},
 	{{'4', '0', '0', '0', 0}, "Gilvan o Gringo", "Dep Federal", {0, 0}},
 	{{'2', '0', '0', '2', 0}, "Sergio Cabeludo", "Dep Federal", {0, 0}},
-	{{'2', '0', '0', '2', 0}, "Sergio Cabeludo", "Dep Federal", {0, 0}}
 };
 
 // Protótipos
@@ -127,7 +126,7 @@ int main(void){
 	ELEITOR eleitor[33];				// Dados dos eleitores, considerando, por absurdo, que todos justifiquem
 	char tecla = 0;						// Guarda tecla pressionada
 	char urna_estado = BLOQUEADA;		// Estado da urna
-	char menu_operacional_index = 1;	// Índice do menu_operacional
+	char menu_index = 1;	// Índice do menu_operacional
 	char option_menu_operacional = 1;	// Opção slecionada do menu_operacional
 	char numero_eleitor[5] = {0};		// Guarda número do eleitor
 	char nome_eleitor[17] = {0};		// Guarda nome do eleitor (max 16 caracteres + \0)
@@ -141,14 +140,14 @@ int main(void){
 		
 		while(urna_estado == BLOQUEADA){
 
-			switch(menu_operacional_index){
+			switch(menu_index){
 				case 1:
 					sendString_setAdress("      Urna      ", 1, 1);
 					sendString_setAdress("   Bloqueada  ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('A');
 					tecla = getCharacter_AB();
 					// se a tecla apertada for A, espera o login do mesário
-					if(tecla == 'A') {menu_operacional_index = 2; /*break;*/}
-					else {menu_operacional_index = 1; /*break;*/}
+					if(tecla == 'A') {menu_index = 2; /*break;*/}
+					else {menu_index = 1; /*break;*/}
 					break;
 				// login do mesário
 				case 2:
@@ -168,23 +167,23 @@ int main(void){
 						// a = 0;
 						tecla = get_tecla();
 						// se tecla A e login com 5 dígitos, prossegue para senha
-						if(tecla == 'A' && input_caracters_counter == 5) {menu_operacional_index = 3;}
+						if(tecla == 'A' && input_caracters_counter == 5) {menu_index = 3;}
 						// se a tecla for B, volta para "urna bloqueada"
-						else if(tecla == 'B') {menu_operacional_index = 1;}
+						else if(tecla == 'B') {menu_index = 1;}
 						// se a tecla for C, apaga o último caractere (não funcionando)
-						else if(tecla == 'C' /*&& input_caracters_counter > 0*/){
+						else if(tecla == 'C' && input_caracters_counter > 0){
 							input_caracters_counter--;
 							setDdRamAddress(10 + input_caracters_counter);
 							sendChar(' ');
 						}
 						// Se for um caractere válido e ainda não tiver execedido o limite, o contabiliza
-						else if(input_caracters_counter < 5 && tecla != '*' && tecla != 'D' && tecla != '#' && tecla != 'A'){
+						else if(input_caracters_counter < 5 && tecla != '*' && tecla != 'D' && tecla != '#' && tecla != 'A' && tecla != 'C'){
 							setDdRamAddress(10 + input_caracters_counter);
 							sendChar(tecla);
 							guarda_login_mesario[input_caracters_counter] = tecla;
 							input_caracters_counter++;
 						}
-					} while(menu_operacional_index == 2);
+					} while(menu_index == 2);
 					break;
 				// senha do mesário
 				case 3:
@@ -205,12 +204,13 @@ int main(void){
 						tecla = get_tecla();
 						// se tecla A e login com 5 dígitos, prossegue para senha
 						if(tecla == 'A' && input_caracters_counter == 5){
+							// Se seha for igual
 							a = 0;
 							for(i = 0; i < 5; i++){
 								if(guarda_login_mesario[i] == login_mesario[i] && guarda_senha_mesario[i] == senha_inicial[i])
 								{a++;}
 							}
-							menu_operacional_index = 1;
+							menu_index = 1;
 							if(a == 5) {urna_estado = OPERACIONAL; /*break;*/}
 							else{
 								sendString_setAdress("     Mesario    ", 1, 1);
@@ -220,21 +220,21 @@ int main(void){
 							
 						}
 						// se a tecla for B, volta para "urna bloqueada"
-						else if(tecla == 'B') {menu_operacional_index = 1;}
-						// se a tecla for C, apaga o último caractere (não funcionando)
-						else if(tecla == 'C' /*&& input_caracters_counter > 0*/){
+						else if(tecla == 'B') {menu_index = 1;}
+						// se a tecla for C, apaga o último caractere
+						else if(tecla == 'C' && input_caracters_counter > 0){
 							input_caracters_counter--;
 							setDdRamAddress(10 + input_caracters_counter);
 							sendChar(' ');
 						}
 						// Se for um caractere válido e ainda não tiver execedido o limite, o contabiliza
-						else if(input_caracters_counter < 5 && tecla != '*' && tecla != 'D' && tecla != '#' && tecla != 'A'){
+						else if(input_caracters_counter < 5 && tecla != '*' && tecla != 'D' && tecla != '#' && tecla != 'A'  && tecla != 'C'){
 							setDdRamAddress(10 + input_caracters_counter);
 							sendChar('*');
 							guarda_senha_mesario[input_caracters_counter] = tecla;
 							input_caracters_counter++;
 						}
-					} while(menu_operacional_index == 3);
+					} while(menu_index == 3);
 					break;
 			}
 
@@ -243,62 +243,62 @@ int main(void){
 		while(urna_estado == OPERACIONAL){
 			
 			// Menu do sistema
-			switch(menu_operacional_index){
+			switch(menu_index){
 				case 1:
 					sendString_setAdress("1. Estado do  ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
 					sendString_setAdress("    Sistema   ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = getCharacter_AB();
-					if(tecla == 'B'){ menu_operacional_index++;}
-					else if(tecla == 'A'){ option_menu_operacional = OPTION_ESTADO; menu_operacional_index = 0;}
+					if(tecla == 'B'){ menu_index++;}
+					else if(tecla == 'A'){ option_menu_operacional = OPTION_ESTADO; menu_index = 0;}
 					break;
 				case 2:
 					sendString_setAdress("2.    Novo    ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
 					sendString_setAdress("     Eleitor  ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = getCharacter_AB();
-					if(tecla == 'B'){ menu_operacional_index++;}
-					else if(tecla == 'A'){ option_menu_operacional = OPTION_ELEITOR; menu_operacional_index = 0;}
+					if(tecla == 'B'){ menu_index++;}
+					else if(tecla == 'A'){ option_menu_operacional = OPTION_ELEITOR; menu_index = 0;}
 					break;
 				case 3:
 					sendString_setAdress("3.  Consulta  ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
 					sendString_setAdress("   de Horario ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = getCharacter_AB();
-					if(tecla == 'B') { menu_operacional_index++;}
-					else if(tecla == 'A') { option_menu_operacional = OPTION_CONSULTA_HORA; menu_operacional_index = 0;}
+					if(tecla == 'B') { menu_index++;}
+					else if(tecla == 'A') { option_menu_operacional = OPTION_CONSULTA_HORA; menu_index = 0;}
 					break;
 				case 4:
 					sendString_setAdress("4.  Troca de  ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
 					sendString_setAdress("    Horario   ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = getCharacter_AB();
-					if(tecla == 'B') { menu_operacional_index++;}
-					else if(tecla == 'A') { option_menu_operacional = OPTION_TROCA_HORA; menu_operacional_index = 0;}
+					if(tecla == 'B') { menu_index++;}
+					else if(tecla == 'A') { option_menu_operacional = OPTION_TROCA_HORA; menu_index = 0;}
 					break;
 				case 5:
 					sendString_setAdress("5.  Verific.  ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
 					sendString_setAdress("de Correspond.", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = getCharacter_AB();
-					if(tecla == 'B') { menu_operacional_index++;}
-					else if(tecla == 'A') { option_menu_operacional = OPTION_VERIFICA_CORRESPONDENCIA; menu_operacional_index = 0;}
+					if(tecla == 'B') { menu_index++;}
+					else if(tecla == 'A') { option_menu_operacional = OPTION_VERIFICA_CORRESPONDENCIA; menu_index = 0;}
 					break;
 				case 6:
 					sendString_setAdress("6. Relatorio  ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
 					sendString_setAdress("  de Votacao  ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = getCharacter_AB();
-					if(tecla == 'B') {menu_operacional_index++;}
-					else if(tecla == 'A') {option_menu_operacional = OPTION_RELATORIO_VOTACAO; menu_operacional_index = 0;}
+					if(tecla == 'B') {menu_index++;}
+					else if(tecla == 'A') {option_menu_operacional = OPTION_RELATORIO_VOTACAO; menu_index = 0;}
 					break;
 				case 7:
 					sendString_setAdress("7.  Troca de  ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
 					sendString_setAdress("     Senha    ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = getCharacter_AB();
-					if(tecla == 'B') {menu_operacional_index++;}
-					else if(tecla == 'A') {option_menu_operacional = OPTION_TROCA_SENHA; menu_operacional_index = 0;}
+					if(tecla == 'B') {menu_index++;}
+					else if(tecla == 'A') {option_menu_operacional = OPTION_TROCA_SENHA; menu_index = 0;}
 					break;
 				case 8:
 					sendString_setAdress("8.  Resetar   ", 1, 1); sendChar(RIGHT_OPTION_CHARACTER); sendChar('A');
 					sendString_setAdress("     Senha    ", 2, 1); sendChar(DOWN_ARROW_CHARACTER); sendChar('B');
 					tecla = getCharacter_AB();
-					if(tecla == 'B') {menu_operacional_index = 1;}
-					else if(tecla == 'A') {option_menu_operacional = OPTION_RESET_SENHA; menu_operacional_index = 0;}
+					if(tecla == 'B') {menu_index = 1;}
+					else if(tecla == 'A') {option_menu_operacional = OPTION_RESET_SENHA; menu_index = 0;}
 					break;
 				default:
 					break;
@@ -356,7 +356,7 @@ int main(void){
 										print_erroComunicacao();
 										tecla = getCharacter_B();
 										option_menu_operacional = 0;
-										menu_operacional_index = 2;
+										menu_index = 2;
 										while(1);
 									}
 									
@@ -366,19 +366,14 @@ int main(void){
 										sendString_setAdress("       FIM      ", 1, 1);
 										sendString_setAdress("                ", 2, 1);
 										votingEndSong();
-										//while(1); 
+										while(1); 
 									}
-									/*else{
-										sendString_setAdress("       ???      ", 1, 1);
-										sendString_setAdress("                ", 2, 1);
-										while(1);
-									}*/
 								}
 								
 								// Se a tecla for 'B', volta ao menu anterior
 								else if(tecla == 'B'){
 									option_menu_operacional = 0;
-									menu_operacional_index = 2;
+									menu_index = 2;
 								}
 							
 							}
@@ -390,7 +385,7 @@ int main(void){
 								sendChar(RETURN_CHARACTER); sendChar('B');
 								tecla = getCharacter_B();
 								option_menu_operacional = 0;
-								menu_operacional_index = 2;
+								menu_index = 2;
 							}
 							
 							// Informa se houve erro na comunicação serial na obtenção do eleitor
@@ -399,14 +394,14 @@ int main(void){
 								sendChar(RETURN_CHARACTER); sendChar('B');
 								tecla = getCharacter_B();
 								option_menu_operacional = 0;
-								menu_operacional_index = 2;
+								menu_index = 2;
 							}
 						}
 						
 						// Se a tecla for B, volta para o menu
 						else if(tecla == 'B'){
 							option_menu_operacional = 0;
-							menu_operacional_index = 2;
+							menu_index = 2;
 						}
 						// Se a tecla for C, corrige último caractere
 						else if(tecla == 'C'){
@@ -431,7 +426,7 @@ int main(void){
 					if(get_tecla() == 'B'){
 						apaga_hora_display();
 						option_menu_operacional = 0;
-						menu_operacional_index = 3;
+						menu_index = 3;
 					}
 					break;
 				
@@ -513,7 +508,7 @@ int main(void){
 								for(i = 0; i < 5; i++){
 									if(guarda_novasenha1_mesario[i] == guarda_novasenha2_mesario[i]) {a++;}
 								}
-								menu_operacional_index = OPTION_TROCA_SENHA;
+								menu_index = OPTION_TROCA_SENHA;
 								if(a == 5){
 									for(i = 0; i < 5; i++) {guarda_senha_mesario[i] = guarda_novasenha1_mesario[i];}
 									sendString_setAdress(" Troca de Senha ", 1, 1);
@@ -530,7 +525,7 @@ int main(void){
 							// se a tecla for B, volta para "urna bloqueada"
 							else if(tecla == 'B'){
 								option_menu_operacional = 0;
-								menu_operacional_index = OPTION_TROCA_SENHA;
+								menu_index = OPTION_TROCA_SENHA;
 								b = 3;
 							}
 							// se a tecla for C, apaga o último caractere (não funcionando)
@@ -548,7 +543,7 @@ int main(void){
 							}
 						} while(b == 2);
 					}
-					else {option_menu_operacional = 0; menu_operacional_index = OPTION_TROCA_SENHA;}
+					else {option_menu_operacional = 0; menu_index = OPTION_TROCA_SENHA;}
 					break;
 				
 				case OPTION_RESET_SENHA:
@@ -639,7 +634,7 @@ char votacao(RELATORIO* relatorio){
 	char input_caracters_counter = 0;
 	
 	// Início do processo de votação
-	sendSerialChar('U'); sendSerialChar('I'); 
+	sendSerialChar('U'); sendSerialChar('I');
 	char response[50] = {0};
 	getSerialMessage(response);
 	
@@ -668,7 +663,7 @@ char votacao(RELATORIO* relatorio){
 				}
 			}
 			// Se votou em branco
-			else if(tecla == 'B'){ 
+			else if(tecla == 'B'){
 				input_caracters_counter = 2;
 				depFederal_numero[0] = '0';
 				depFederal_numero[1] = '0';
@@ -685,7 +680,7 @@ char votacao(RELATORIO* relatorio){
 				depFederal_numero_bkp[1] = depFederal_numero[1];
 				depFederal_numero_bkp[2] = 0;
 				sendSerialMessage(depFederal_numero_bkp);
-			}else {
+				}else {
 				sendSerialMessage(depFederal_numero);
 			}
 			getSerialMessage(response);
@@ -880,7 +875,7 @@ char votacao(RELATORIO* relatorio){
 			presidente_numero[input_caracters_counter] = tecla;
 			input_caracters_counter++;
 			sendChar(tecla);
-		}		
+		}
 	}while(tecla != 'A' && tecla != 'B');
 	
 	// Fim do processo de votação
@@ -909,14 +904,6 @@ void print_optionsVotacao(){
 	sendChar(RIGHT_OPTION_CHARACTER);
 	setDdRamAddress(0x40 + 14);
 	sendChar(LEFT_ARROW_CHARACTER);
-}
-
-// Aloca str2 em str1
-void strCpy(char* str1, char* str2){
-	char i;
-	for(i = 0; i < sizeof(str1); i++){
-		str1[i] = str2[2];
-	}
 }
 
 void cleanString(char* string){
