@@ -9,13 +9,13 @@
 void initSerialConfig(){
 	UCSR0B = 16+8; // habilita transmissão e recepção serial
 	UBRR0 = 51; // baud rate de 19200 bps
-	sei();
 	UCSR0B |= (1<<7); // habilita interrupção por recepção serial
+	sei();
 }
 
 // aguarda a chegada de um caractere na comunicação serial e retorna-o
 char getSerialChar(){
-	UCSR0A &= ~(1<<7); // desabilita interrupção por recepção serial
+	UCSR0B &= ~(1<<7); // desabilita interrupção por recepção serial
 	while((UCSR0A & (1<<7)) == 0); // aguarda uma recepção serial
 	return UDR0;
 	UCSR0B |= (1<<7); // habilita interrupção por recepção serial
@@ -70,7 +70,7 @@ ISR(USART_RX_vect){
 	char msg[4];
 	msg[0] = UDR0;
 	if(msg[0] == 'M'){
-		UCSR0A &= ~(1<<7); // desabilita interrupção por recepção serial
+		UCSR0B &= ~(1<<7); // desabilita interrupção por recepção serial
 		msg[1] = getSerialChar();
 		if(msg[1] == 'H'){
 			msg[2] = getSerialChar();
