@@ -696,7 +696,7 @@ char votacao(RELATORIO* relatorio){
 			}
 			
 			// Obtém nome do candidato através da reposta serial
-			char i, a = strlen(response);
+			char i, a = strlen(&response[3]);
 			for(i = 0; i < a; i++){
 				depFederal_nome[i] = response[3 + i];
 			}
@@ -769,7 +769,7 @@ char votacao(RELATORIO* relatorio){
 			}
 			
 			// Obtém nome do candidato através da reposta serial
-			char i, a = strlen(response);
+			char i, a = strlen(&response[3]);
 			for(i = 0; i < a; i++){
 				senador_nome[i] = response[3 + i];
 			}
@@ -844,7 +844,7 @@ char votacao(RELATORIO* relatorio){
 			}
 			
 			// Obtém nome do candidato através da reposta serial
-			char i, a = strlen(response);
+			char i, a = strlen(&response[3]);
 			for(i = 0; i < a; i++){
 				presidente_nome[i] = response[3 + i];
 			}
