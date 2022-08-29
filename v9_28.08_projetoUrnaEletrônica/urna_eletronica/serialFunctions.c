@@ -15,10 +15,12 @@ void initSerialConfig(){
 
 // aguarda a chegada de um caractere na comunicação serial e retorna-o
 char getSerialChar(){
+	char udr;
 	UCSR0B &= ~(1<<7); // desabilita interrupção por recepção serial
 	while((UCSR0A & (1<<7)) == 0); // aguarda uma recepção serial
-	return UDR0;
+	udr = UDR0;
 	UCSR0B |= (1<<7); // habilita interrupção por recepção serial
+	return udr;
 }
 
 // envia um caractere via comunicação serial
