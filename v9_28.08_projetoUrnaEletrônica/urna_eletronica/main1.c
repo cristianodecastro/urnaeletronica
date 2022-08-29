@@ -126,7 +126,7 @@ int main(void){
 	RELATORIO relatorio_votacao;		// Relatorio da votacao
 	ELEITOR eleitor[33];				// Dados dos eleitores, considerando, por absurdo, que todos justifiquem
 	char tecla = 0;						// Guarda tecla pressionada
-	char urna_estado = BLOQUEADA;		// Estado da urna
+	char urna_estado = OPERACIONAL;		// Estado da urna
 	char menu_index = 1;	// Índice do menu_operacional
 	char option_menu_operacional = 1;	// Opção slecionada do menu_operacional
 	char numero_eleitor[5] = {0};		// Guarda número do eleitor
@@ -136,6 +136,9 @@ int main(void){
 	const char login_mesario[5] = "01237";
 	const char senha_inicial[5] = "12378";
 	unsigned char input_caracters_counter = 0;	// Contador de daracteres inseridos pelo usuário
+	
+	char verificacao = 0;
+	char consistencia[50] = {0};
 	
 	while (1){
 		
@@ -440,7 +443,48 @@ int main(void){
 					break;
 				
 				case OPTION_VERIFICA_CORRESPONDENCIA:
-					// TO DO
+					do{
+						sendSerialChar('U'); sendSerialChar('V');
+						sendSerialChar(currentTime[HOURS]); sendSerialChar(currentTime[MINUTES]); sendSerialChar(num_eleitores);
+						getSerialMessage(consistencia);
+						if(consistencia[0] == 'M' && consistencia[1] == 'V'){
+							if(consistencia[2] == 'O'){
+								verificacao = 3;
+								sendString_setAdress("  CONSISTENCIA  ", 1, 1);
+								sendString_setAdress("       OK       ", 2, 1);
+								delay_ms(1000);
+								option_menu_operacional = 0;
+								menu_index = 5;
+							}
+							else if(consistencia[2] == 'I'){
+								verificacao++;
+								if(verificacao == 3){
+									urna_estado = BLOQUEADA;
+									sendString_setAdress("  CONSISTENCIA  ", 1, 1);
+									sendString_setAdress("     FALHOU     ", 2, 1);
+									delay_ms(1000);
+									sendString_setAdress("   BLOQUEANDO   ", 1, 1);
+									sendString_setAdress("      URNA      ", 2, 1);
+									delay_ms(1000);
+									option_menu_operacional = 0;
+									menu_index = 1;
+								}
+								
+							}
+							else if(consistencia[2] == 'X'){
+								verificacao = 3;
+								urna_estado = BLOQUEADA;
+								sendString_setAdress("  CONSISTENCIA  ", 1, 1);
+								sendString_setAdress("     FALHOU     ", 2, 1);
+								delay_ms(1000);
+								sendString_setAdress("   BLOQUEANDO   ", 1, 1);
+								sendString_setAdress("      URNA      ", 2, 1);
+								delay_ms(1000);
+								option_menu_operacional = 0;
+								menu_index = 1;
+							}
+						}
+					} while(verificacao < 3);
 					break;
 				
 				case OPTION_RELATORIO_VOTACAO:
