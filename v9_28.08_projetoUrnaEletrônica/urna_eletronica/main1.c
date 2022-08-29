@@ -62,6 +62,7 @@ CANDIDATO candidato[13] = {
 	{{'4', '4', '5', '6', 0}, "Fortunati", "Dep Federal", {0, 0}},
 	{{'4', '0', '0', '0', 0}, "Gilvan o Gringo", "Dep Federal", {0, 0}},
 	{{'2', '0', '0', '2', 0}, "Sergio Cabeludo", "Dep Federal", {0, 0}},
+	{{'2', '0', '0', '2', 0}, "Sergio Cabeludo", "Dep Federal", {0, 0}}
 };
 
 // Protótipos
@@ -198,13 +199,12 @@ int main(void){
 					sendChar(LEFT_ARROW_CHARACTER);
 					setDdRamAddress(8);
 					
-					char i, a;
+					unsigned char i, a;
 					do{
 						// a = 0;
 						tecla = get_tecla();
 						// se tecla A e login com 5 dígitos, prossegue para senha
 						if(tecla == 'A' && input_caracters_counter == 5){
-							// Se seha for igual
 							a = 0;
 							for(i = 0; i < 5; i++){
 								if(guarda_login_mesario[i] == login_mesario[i] && guarda_senha_mesario[i] == senha_inicial[i])
@@ -221,14 +221,14 @@ int main(void){
 						}
 						// se a tecla for B, volta para "urna bloqueada"
 						else if(tecla == 'B') {menu_index = 1;}
-						// se a tecla for C, apaga o último caractere
+						// se a tecla for C, apaga o último caractere (não funcionando)
 						else if(tecla == 'C' && input_caracters_counter > 0){
 							input_caracters_counter--;
 							setDdRamAddress(10 + input_caracters_counter);
 							sendChar(' ');
 						}
 						// Se for um caractere válido e ainda não tiver execedido o limite, o contabiliza
-						else if(input_caracters_counter < 5 && tecla != '*' && tecla != 'D' && tecla != '#' && tecla != 'A'  && tecla != 'C'){
+						else if(input_caracters_counter < 5 && tecla != '*' && tecla != 'D' && tecla != '#' && tecla != 'A' && tecla != 'C'){
 							setDdRamAddress(10 + input_caracters_counter);
 							sendChar('*');
 							guarda_senha_mesario[input_caracters_counter] = tecla;
@@ -366,8 +366,13 @@ int main(void){
 										sendString_setAdress("       FIM      ", 1, 1);
 										sendString_setAdress("                ", 2, 1);
 										votingEndSong();
-										while(1); 
+										//while(1); 
 									}
+									/*else{
+										sendString_setAdress("       ???      ", 1, 1);
+										sendString_setAdress("                ", 2, 1);
+										while(1);
+									}*/
 								}
 								
 								// Se a tecla for 'B', volta ao menu anterior
@@ -499,7 +504,7 @@ int main(void){
 						setDdRamAddress(0x40 + 14);
 						sendChar(LEFT_ARROW_CHARACTER);
 
-						char a, i;
+						unsigned char a, i;
 						do{
 							tecla = get_tecla();
 							// se tecla A e senha com 5 dígitos, confere senhas
@@ -590,7 +595,7 @@ char valida_eleitor(char* eleitor, char* nome_eleitor){
 	char response[20] = {0};
 	
 	// Constrói a mensagem a ser enviada serialmente
-	char i;
+	unsigned char i;
 	for(i = 0; i < 5; i++){
 		message[i + 3] = eleitor[i];
 	}
@@ -631,10 +636,10 @@ char votacao(RELATORIO* relatorio){
 	char presidente_numero[3]  = {0,0,'\0'};
 	char presidente_nome[17] = {0};
 	char tecla = 0;
-	char input_caracters_counter = 0;
+	unsigned char input_caracters_counter = 0;
 	
 	// Início do processo de votação
-	sendSerialChar('U'); sendSerialChar('I');
+	sendSerialChar('U'); sendSerialChar('I'); 
 	char response[50] = {0};
 	getSerialMessage(response);
 	
@@ -663,7 +668,7 @@ char votacao(RELATORIO* relatorio){
 				}
 			}
 			// Se votou em branco
-			else if(tecla == 'B'){
+			else if(tecla == 'B'){ 
 				input_caracters_counter = 2;
 				depFederal_numero[0] = '0';
 				depFederal_numero[1] = '0';
@@ -680,7 +685,7 @@ char votacao(RELATORIO* relatorio){
 				depFederal_numero_bkp[1] = depFederal_numero[1];
 				depFederal_numero_bkp[2] = 0;
 				sendSerialMessage(depFederal_numero_bkp);
-				}else {
+			}else {
 				sendSerialMessage(depFederal_numero);
 			}
 			getSerialMessage(response);
@@ -691,7 +696,7 @@ char votacao(RELATORIO* relatorio){
 			}
 			
 			// Obtém nome do candidato através da reposta serial
-			char i, a = strlen(&response[3]);
+			unsigned char i, a = strlen(&response[3]);
 			for(i = 0; i < a; i++){
 				depFederal_nome[i] = response[3 + i];
 			}
@@ -764,7 +769,7 @@ char votacao(RELATORIO* relatorio){
 			}
 			
 			// Obtém nome do candidato através da reposta serial
-			char i, a = strlen(&response[3]);
+			unsigned char i, a = strlen(&response[3]);
 			for(i = 0; i < a; i++){
 				senador_nome[i] = response[3 + i];
 			}
@@ -839,7 +844,7 @@ char votacao(RELATORIO* relatorio){
 			}
 			
 			// Obtém nome do candidato através da reposta serial
-			char i, a = strlen(&response[3]);
+			unsigned char i, a = strlen(&response[3]);
 			for(i = 0; i < a; i++){
 				presidente_nome[i] = response[3 + i];
 			}
@@ -875,7 +880,7 @@ char votacao(RELATORIO* relatorio){
 			presidente_numero[input_caracters_counter] = tecla;
 			input_caracters_counter++;
 			sendChar(tecla);
-		}
+		}		
 	}while(tecla != 'A' && tecla != 'B');
 	
 	// Fim do processo de votação
@@ -906,8 +911,16 @@ void print_optionsVotacao(){
 	sendChar(LEFT_ARROW_CHARACTER);
 }
 
+// Aloca str2 em str1
+void strCpy(char* str1, char* str2){
+	unsigned char i;
+	for(i = 0; i < sizeof(str1); i++){
+		str1[i] = str2[2];
+	}
+}
+
 void cleanString(char* string){
-	char i;
+	unsigned char i;
 	for(i = 0; i < sizeof(string); i++){
 		string[i] = 0;
 	}
