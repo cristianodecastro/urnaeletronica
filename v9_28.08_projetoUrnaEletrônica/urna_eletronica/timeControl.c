@@ -1,4 +1,3 @@
-
 #include "timeControl.h"
 #include "serialFunctions.h"
 #include "lcd.h"
@@ -7,7 +6,7 @@
 #include <avr/interrupt.h>
 #include <string.h>
 
-unsigned char currentTime[3]={0, 0, 0}; // guarda o horário atual em horas, minutos e segundos
+unsigned char currentTime[3]={0, 0, 0}; // guarda o horÃ¡rio atual em horas, minutos e segundos
 char exibindo_hora_display = 0;
 
 // tempo em microssegundos
@@ -41,16 +40,16 @@ void delay_ms(long int t_ms){
 }
 
 void timeControlConfig(){
-	TCCR1A = 0b00000000; // modo de contagem contínua até o valor do comparador A
+	TCCR1A = 0b00000000; // modo de contagem contÃ­nua atÃ© o valor do comparador A
 	TCCR1B = 0b00001100; // prescaler = 256 => frequencia do timer = 16MHz / 256 = 62.5Hz => T = 16us
-	OCR1A = 62500-1; // teto de contagem; vai contar de 0 até [(pulsos em um segundo) - 1] = contagem de um segundo
+	OCR1A = 62500-1; // teto de contagem; vai contar de 0 atÃ© [(pulsos em um segundo) - 1] = contagem de um segundo
 	TCNT1 = 0;
 
 	TIMSK1 |= ( 1 << 1 ); // habilita interrupcao por comparador A do timer1
 	sei();
 }
 
-// redefine o horário se os valores passados nos argumentos forem coerentes
+// redefine o horÃ¡rio se os valores passados nos argumentos forem coerentes
 unsigned char setTime(unsigned char hours, unsigned char minutes){
 	if((hours < 24) && (minutes < 60)){
 		currentTime[HOURS] = hours;
@@ -62,7 +61,7 @@ unsigned char setTime(unsigned char hours, unsigned char minutes){
 	}
 }
 
-// incrementa horário em um segundo
+// incrementa horÃ¡rio em um segundo
 void incTime(){
 	if(currentTime[SECONDS] == 59){
 		currentTime[SECONDS] = 0;
@@ -102,5 +101,3 @@ ISR(TIMER1_COMPA_vect)
 	}
 	TIFR1 = ( 1 << 1 ); // limpa flag de estouro
 }
-
-
