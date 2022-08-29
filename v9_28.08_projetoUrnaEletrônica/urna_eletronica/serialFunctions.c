@@ -2,27 +2,32 @@
 #include "timeControl.h"
 
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <string.h>
 
-// habilita a transmiss�o serial e define a taxa de transmiss�o
+// habilita a transmissão serial e define a taxa de transmissão
 void initSerialConfig(){
-	UCSR0B = 16+8; // habilita transmiss�o e recep��o serial
+	UCSR0B = 16+8; // habilita transmissão e recepção serial
 	UBRR0 = 51; // baud rate de 19200 bps
+	sei();
+	UCSR0B |= (1<<7); // habilita interrupção por recepção serial
 }
 
-// aguarda a chegada de um caractere na comunica��o serial e retorna-o
+// aguarda a chegada de um caractere na comunicação serial e retorna-o
 char getSerialChar(){
-	while((UCSR0A & (1<<7)) == 0); // aguarda uma recep��o serial
+	UCSR0A &= ~(1<<7); // desabilita interrupção por recepção serial
+	while((UCSR0A & (1<<7)) == 0); // aguarda uma recepção serial
 	return UDR0;
+	UCSR0B |= (1<<7); // habilita interrupção por recepção serial
 }
 
-// envia um caractere via comunica��o serial
+// envia um caractere via comunicação serial
 void sendSerialChar(char character){
 	UDR0 = character;
-	while((UCSR0A & (1<<5)) == 0); // aguarda finalizar a transmiss�o serial para enviar pr�ximo caractere
+	while((UCSR0A & (1<<5)) == 0); // aguarda finalizar a transmissão serial para enviar próximo caractere
 }
 
-// captura uma mensagem recebida via comunica��o serial
+// captura uma mensagem recebida via comunicação serial
 void getSerialMessage(char* message){
 	do{
 		message[0] = getSerialChar();
@@ -40,15 +45,7 @@ void getSerialMessage(char* message){
 				message[3] = '\0';
 				return;
 			}
-		}
-		if(message[1] == 'H'){
-			message[2] = getSerialChar();
-			message[3] = getSerialChar();
-			if((message[2] < 24 && message[3] < 60)){
-				message[4] = '\0';
-				return;
-			}
-		}
+ 		}
 		if((message[1] == 'N' || message[1] == 'P' || /*message[1] == 'G' ||*/ message[1] == 'S' || message[1] == 'F')){
 			message[2] = getSerialChar();
 			for(char i=0; i<message[2]; i++){
@@ -61,10 +58,27 @@ void getSerialMessage(char* message){
 	return;
 }
 
-// envia uma mensagem via comunica��o serial
+// envia uma mensagem via comunicação serial
 void sendSerialMessage(char* message){
 	int tamanhoStr = strlen(message);
 	for(int i=0; i<=tamanhoStr; i++){
 		sendSerialChar(message[i]);
+	}
+}
+
+ISR(USART_RX_vect){
+	char msg[4];
+	msg[0] = UDR0;
+	if(msg[0] == 'M'){
+		UCSR0A &= ~(1<<7); // desabilita interrupção por recepção serial
+		msg[1] = getSerialChar();
+		if(msg[1] == 'H'){
+			msg[2] = getSerialChar();
+			msg[3] = getSerialChar();
+			if(!setTime(msg[2], msg[3])){
+				sendSerialMessage("UH");
+			}
+		}
+		UCSR0B |= (1<<7); // habilita interrupção por recepção serial
 	}
 }
